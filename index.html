@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>High School Football Coach</title>
+  <meta name="theme-color" content="#101827" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; background: #0b1220; color: #e8eefc; }
+    header { padding: 16px; background: #101827; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid rgba(255,255,255,.08); }
+    header h1 { margin: 0; font-size: 18px; }
+    header .sub { opacity: .8; font-size: 12px; margin-top: 6px; }
+    main { padding: 16px; max-width: 900px; margin: 0 auto; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 860px) { .row { grid-template-columns: 1.2fr .8fr; } }
+    .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: 14px; padding: 14px; }
+    .card h2 { margin: 0 0 10px 0; font-size: 16px; }
+    .pill { display: inline-flex; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.10); font-size: 12px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    button {
+      width: 100%;
+      background: #1f3cff;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.secondary { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.14); }
+    button.danger { background: #c81e3a; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    select, input[type="text"] {
+      width: 100%;
+      border-radius: 10px;
+      padding: 10px 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.25);
+      color: #e8eefc;
+      outline: none;
+    }
+    .muted { opacity: .8; }
+    .small { font-size: 12px; }
+    .log {
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 12px;
+      padding: 10px;
+      height: 340px;
+      overflow: auto;
+      white-space: pre-wrap;
+      line-height: 1.35;
+      font-size: 12px;
+    }
+    .kpi { font-size: 22px; font-weight: 800; }
+    .sep { height: 1px; background: rgba(255,255,255,.10); margin: 12px 0; }
+    .tag { display:inline-block; padding:4px 8px; border-radius: 999px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); font-size: 12px; margin-right: 6px; margin-top: 6px;}
+    a { color: #9fb4ff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>High School Football Coach</h1>
+    <div class="sub">A one-player dynasty dice game • “Dice behind the curtain” edition</div>
+  </header>
+
+  <main>
+    <div class="row">
+      <section class="card">
+        <h2>Game Control</h2>
+
+        <div class="grid2">
+          <div>
+            <div class="pill"><strong>Career</strong> <span id="careerStatus" class="muted">—</span></div>
+          </div>
+          <div style="text-align:right;">
+            <div class="pill"><strong>Save</strong> <span id="saveStatus" class="muted">Ready</span></div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="grid2">
+          <div>
+            <div class="muted small">Coach name (optional)</div>
+            <input id="coachName" type="text" placeholder="Coach" />
+          </div>
+          <div>
+            <div class="muted small">If earning/receiving “one advantage,” choose default side</div>
+            <select id="defaultAdvSide">
+              <option value="offense">Offense</option>
+              <option value="defense">Defense</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="grid3">
+          <button id="btnNewCareer" class="danger">New Career</button>
+          <button id="btnNext" disabled>Play Next Game</button>
+          <button id="btnResetSeason" class="secondary" disabled>Restart Current Season</button>
+        </div>
+
+        <div id="choicePanel" class="card" style="margin-top:12px; display:none;">
+          <h2>Decision Needed</h2>
+          <div id="choiceText" class="muted" style="margin-bottom:10px;"></div>
+          <div class="grid2">
+            <button id="btnChooseOffense">Choose Offense</button>
+            <button id="btnChooseDefense">Choose Defense</button>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>Current Season Snapshot</h2>
+        <div class="grid2">
+          <div class="card">
+            <div class="muted small">Season</div>
+            <div class="kpi" id="kpiSeason">—</div>
+            <div class="muted small" id="kpiPhase">—</div>
+          </div>
+          <div class="card">
+            <div class="muted small">Record</div>
+            <div class="kpi" id="kpiRecord">—</div>
+            <div class="muted small" id="kpiDistrict">—</div>
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <h2>Team Advantages</h2>
+        <div id="advTags"></div>
+        <div class="muted small" style="margin-top:8px;">
+          Offense advantage = you roll <strong>2</strong> extra dice instead of 1 (extra dice can “explode” on 6).<br/>
+          Defense advantage = opponent gets <strong>no</strong> extra dice (no exploding), only base score rules.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Game Log</h2>
+        <div class="log" id="log"></div>
+        <div class="sep"></div>
+        <div class="grid2">
+          <button id="btnExport" class="secondary" disabled>Export Log (.txt)</button>
+          <button id="btnClearLog" class="secondary" disabled>Clear Log</button>
+        </div>
+        <div class="muted small" style="margin-top:10px;">
+          Tip: This app auto-saves to your browser storage. If you clear Chrome storage, it resets.
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // Service worker (only works if served from https:// or local server)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
+  </script>
+</body>
+</html>
